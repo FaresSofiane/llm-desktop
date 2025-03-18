@@ -10,7 +10,8 @@ function createWindow() {
     height: 670,
     titleBarStyle: 'hidden',
     trafficLightPosition: { x: 12.5, y: 11.5 },
-    show: false,
+    ...(process.platform !== 'darwin' ? { titleBarOverlay: true } : {}),
+    show: true,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
@@ -18,7 +19,7 @@ function createWindow() {
       sandbox: false
     },
     ...(process.platform === 'darwin' && { vibrancy: 'fullscreen-ui' }), // MacOS
-    ...(process.platform === 'win32' && { backgroundMaterial: 'mica' }) // Windows
+    ...(process.platform === 'win32' && { backgroundMaterial: 'acrylic' }) // Windows
   })
 
   mainWindow.on('ready-to-show', () => {
