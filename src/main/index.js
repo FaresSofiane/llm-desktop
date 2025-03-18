@@ -8,13 +8,17 @@ function createWindow() {
   const mainWindow = new BrowserWindow({
     width: 900,
     height: 670,
+    titleBarStyle: 'hidden',
+    trafficLightPosition: { x: 12.5, y: 11.5 },
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
-    }
+    },
+    ...(process.platform === 'darwin' && { vibrancy: 'fullscreen-ui' }), // MacOS
+    ...(process.platform === 'win32' && { backgroundMaterial: 'mica' }) // Windows
   })
 
   mainWindow.on('ready-to-show', () => {
