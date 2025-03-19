@@ -21,6 +21,10 @@
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^4.0.0",
     "@tailwindcss/vite": "^4.0.14",
+    "lucide-react": "^0.483.0",
+    "ollama": "^0.5.14",
+    "react-markdown": "^10.1.0",
+    "react-syntax-highlighter": "^15.6.1",
     "tailwindcss": "^4.0.14"
   },
   "devDependencies": {

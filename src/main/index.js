@@ -9,6 +9,7 @@ function createWindow() {
     width: 900,
     height: 670,
     titleBarStyle: 'hidden',
+    ...(process.platform !== 'darwin' ? { titleBarOverlay: true } : {}),
     trafficLightPosition: { x: 12.5, y: 11.5 },
     ...(process.platform !== 'darwin' ? { titleBarOverlay: true } : {}),
     show: true,
@@ -56,6 +57,8 @@ app.whenReady().then(() => {
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
+
+  ipcMain.handle('electron:platform', () => process.platform)
 
   createWindow()
 
