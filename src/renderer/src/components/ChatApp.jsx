@@ -5,7 +5,8 @@ import { useState, useEffect } from 'react'
 import ollama from 'ollama'
 
 const ChatApp = () => {
-  const { conversations, currentConversationId, loading, addMessageToConversation, selectedModel } = useLLMManager()
+  const { conversations, currentConversationId, loading, addMessageToConversation, selectedModel } =
+    useLLMManager()
   const [localMessages, setLocalMessages] = useState([])
   const [typingMessage, setTypingMessage] = useState('') // État pour le texte en cours d'écriture
 
@@ -20,30 +21,30 @@ const ChatApp = () => {
 
   const handleSendMessage = async (messageData) => {
     // Extraction du texte et des images depuis messageData
-    const { text, images = [] } = messageData;
+    const { text, images = [] } = messageData
 
-    setIsLoading(true); // Indiquer que le chargement est en cours
+    setIsLoading(true) // Indiquer que le chargement est en cours
 
     // Ajout du message utilisateur à la conversation
-    addMessageToConversation(text, 'me', images);
+    addMessageToConversation(text, 'me', images)
 
     console.log(conversations)
 
     try {
       // Création d'une réponse vide pour commencer
-      let responseText = '';
-      setTypingMessage(''); // Réinitialiser le message en cours de frappe
+      let responseText = ''
+      setTypingMessage('') // Réinitialiser le message en cours de frappe
 
       // Préparer le message à envoyer à l'API
       const userMessage = {
         role: 'user',
         content: text
-      };
+      }
 
       // Si des images sont présentes, les ajouter au message
       if (images && images.length > 0) {
         // Ollama prend en charge les images dans le format suivant
-        userMessage.images = images;
+        userMessage.images = images
       }
 
       // Envoie la demande à ollama.chat avec streaming
@@ -51,32 +52,34 @@ const ChatApp = () => {
         model: selectedModel || 'llama3.1',
         messages: [userMessage],
         stream: true
-      });
+      })
 
       // Traitement de la réponse en streaming
       for await (const part of response) {
-        const newContent = part.message.content;
-        responseText += newContent;
-        setTypingMessage(responseText); // Mise à jour du message en cours de frappe
+        const newContent = part.message.content
+        responseText += newContent
+        setTypingMessage(responseText) // Mise à jour du message en cours de frappe
       }
 
       // Une fois la réponse complète reçue, ajouter à la conversation
-      addMessageToConversation(responseText, 'assistant');
+      addMessageToConversation(responseText, 'assistant')
 
-      console.log(typingMessage);
-      setTypingMessage(''); // Réinitialiser le message en cours de frappe
+      console.log(typingMessage)
+      setTypingMessage('') // Réinitialiser le message en cours de frappe
     } catch (error) {
-      console.error('Erreur lors de la communication avec Ollama:', error);
-      addMessageToConversation("Une erreur est survenue lors de la communication avec le modèle.", "system");
-      setIsLoading(false); // Indiquer que le chargement est en cours
-
+      console.error('Erreur lors de la communication avec Ollama:', error)
+      addMessageToConversation(
+        'Une erreur est survenue lors de la communication avec le modèle.',
+        'system'
+      )
+      setIsLoading(false) // Indiquer que le chargement est en cours
     } finally {
-      setIsLoading(false); // Indiquer que le chargement est terminé
+      setIsLoading(false) // Indiquer que le chargement est terminé
     }
-  };
+  }
 
   return (
-    <div className="flex flex-col h-[80vh]">
+    <div className="flex flex-col h-[90vh]">
       <Conversation
         messages={localMessages}
         isLoading={isLoading}

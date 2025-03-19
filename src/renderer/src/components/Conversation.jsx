@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react'
 import remarkGfm from 'remark-gfm'
 import Markdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { dark } from 'react-syntax-highlighter/dist/esm/styles/prism'
+import { materialDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { Copy } from 'lucide-react'
 
 const Conversation = ({ messages, isLoading, typingMessage }) => {
@@ -50,13 +50,13 @@ const Conversation = ({ messages, isLoading, typingMessage }) => {
             return (
               <div
                 key={index}
-                className={`max-w-2xl p-3 rounded-lg animate-fade-in ${
+                className={`${
                   msg.isError
-                    ? 'bg-red-500 text-white self-start mr-auto text-left'
+                    ? 'bg-red-500 text-white self-start mr-auto text-left max-w-2xl'
                     : isSentByMe
-                      ? 'bg-blue-500 text-white self-end ml-auto text-left'
-                      : 'bg-gray-300 text-black self-start mr-auto text-left'
-                }`}
+                      ? 'bg-blue-500 text-white self-end ml-auto text-left max-w-2xl'
+                      : 'bg-gray-300 text-black self-start mr-auto text-left max-w-4xl'
+                } p-3 rounded-lg animate-fade-in`}
               >
                 {/* En-tête du message */}
                 <div className="flex justify-between items-center mb-2 border-b border-opacity-20 pb-2">
@@ -86,13 +86,39 @@ const Conversation = ({ messages, isLoading, typingMessage }) => {
                       code(props) {
                         const { children, className, node, ...rest } = props
                         const match = /language-(\w+)/.exec(className || '')
+                        const language = match ? match[1] : 'text'
+                        const codeString = String(children).replace(/\n$/, '')
+
                         return match ? (
-                          <SyntaxHighlighter
-                            {...rest}
-                            PreTag="div"
-                            children={String(children).replace(/\n$/, '')}
-                            language={match[1]}
-                          />
+                          <div className="relative mt-2">
+                            {/* En-tête du bloc de code */}
+                            <div className="flex justify-between items-center px-4 py-2 bg-[#2d2d2d] rounded-t border border-gray-500 shadow-lg">
+                              <span className="text-gray-300 text-sm">{language}</span>
+                              <button
+                                onClick={() => copyToClipboard(codeString)}
+                                className="p-1 hover:bg-gray-700 rounded group relative"
+                                aria-label="Copier le code"
+                              >
+                                <Copy size={16} className="text-gray-300" />
+                                <div className="absolute hidden group-hover:block bg-gray-700 text-white text-xs py-1 px-2 rounded -bottom-8 right-0 whitespace-nowrap">
+                                  Copier
+                                </div>
+                              </button>
+                            </div>
+                            <SyntaxHighlighter
+                              {...rest}
+                              PreTag="div"
+                              language={language}
+                              style={materialDark}
+                              className="rounded-t-none rounded-b !mt-0"
+                              customStyle={{
+                                margin: 0,
+                                backgroundColor: '#2d2d2d'
+                              }}
+                            >
+                              {codeString}
+                            </SyntaxHighlighter>
+                          </div>
                         ) : (
                           <code {...rest} className={className}>
                             {children}
