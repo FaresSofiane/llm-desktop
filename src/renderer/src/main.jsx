@@ -31,7 +31,7 @@ const Main = () => {
 
   return (
     <div className="w-screen h-screen">
-      <TopBar size={size} />
+      <TopBar size={size} platform={platform} />
       <div className={`h-[calc(100vh-${size === 'h-10' ? '3rem' : '2.5rem'})] w-screen`}>
         <App />
       </div>
