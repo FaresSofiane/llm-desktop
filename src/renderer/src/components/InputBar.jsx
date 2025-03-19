@@ -5,6 +5,23 @@ export default function InputBar({ onSendMessage, isLoading }) {
   const [input, setInput] = useState('')
   const [images, setImages] = useState([])
   const fileInputRef = useRef(null)
+  const textareaRef = useRef(null)
+
+  // Ajout de la fonction pour ajuster la hauteur du textarea
+  const adjustTextareaHeight = () => {
+    const textarea = textareaRef.current
+    if (!textarea) return
+
+    textarea.style.height = 'auto'
+    const newHeight = Math.min(textarea.scrollHeight, 5 * 24) // 24px est la hauteur approximative d'une ligne
+    textarea.style.height = `${newHeight}px`
+  }
+
+  // Gestionnaire de changement de texte
+  const handleInputChange = (e) => {
+    setInput(e.target.value)
+    adjustTextareaHeight()
+  }
 
   // Conversion de l'image en Base64
   const convertImageToBase64 = (file) => {
@@ -59,13 +76,13 @@ export default function InputBar({ onSendMessage, isLoading }) {
     const files = Array.from(e.target.files)
     if (files.length === 0) return
 
-    const newImages = files.map(file => ({
+    const newImages = files.map((file) => ({
       file,
       name: file.name,
       url: URL.createObjectURL(file)
     }))
 
-    setImages(prevImages => [...prevImages, ...newImages])
+    setImages((prevImages) => [...prevImages, ...newImages])
   }
 
   const removeImage = (index) => {
@@ -109,28 +126,27 @@ export default function InputBar({ onSendMessage, isLoading }) {
 
       {/* Barre de saisie */}
       <div className="flex items-center bg-gray-100 rounded-lg p-2 w-full">
-        <input
-          type="text"
+        <textarea
+          ref={textareaRef}
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={handleInputChange}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey && !isLoading) {
-              e.preventDefault();
-              handleSend();
+              e.preventDefault()
+              handleSend()
             }
           }}
-          placeholder={isLoading ? "En cours de réflexion..." : "Tapez ici..."}
-          className="flex-1 bg-transparent outline-none text-gray-900 p-2"
+          placeholder={isLoading ? 'En cours de réflexion...' : 'Tapez ici...'}
+          className="flex-1 bg-transparent outline-none text-gray-900 p-2 resize-none min-h-[24px] max-h-[120px] overflow-y-auto whitespace-pre-wrap"
           disabled={isLoading}
+          rows={1}
         />
 
         {/* Bouton d'ajout d'images */}
         <button
           onClick={() => !isLoading && fileInputRef.current.click()}
           className={`text-white p-2 rounded-full mr-2 transition-colors ${
-            isLoading
-              ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-blue-500 hover:bg-blue-600'
+            isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'
           }`}
           disabled={isLoading}
         >
