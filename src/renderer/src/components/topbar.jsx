@@ -1,9 +1,9 @@
 import { useLLMManager } from '../context/LLMManagerContext' // Importez le contexte
 import { useState, useEffect, useRef } from 'react'
 
-import { RotateCcw } from 'lucide-react'
+import { RotateCcw, ChevronDown } from 'lucide-react'
 
-export default function TopBar({ size }) {
+export default function TopBar({ size, platform }) {
   const {
     models,
     selectedModel,
@@ -65,17 +65,19 @@ export default function TopBar({ size }) {
   return (
     <div className={`w-screen ${size} bg-[#f0f0ef] flex flex-row items-center`}>
       {/* Colonne draggable avec largeur fixe */}
-      <div className="flex-none" style={{ width: '75px' }}></div>
-
+      <div className="flex-none" style={{ width: platform === 'darwin' ? '75px' : '10px' }}></div>
       {/* Colonne avec le bouton dropdown pour les modèles */}
       <div className="flex-none relative z-50 flex justify-center">
         <button
-          className="text-gray-700 px-4 py-2 hover:bg-gray-300 pointer-cursor"
-          onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)} // Basculez l'état du menu déroulant
+          className="text-gray-700 px-4 py-2 hover:bg-gray-300 pointer-cursor flex items-center"
+          onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
           aria-haspopup="true"
           aria-expanded={isModelDropdownOpen}
         >
-          {selectedModel ? selectedModel.split(':')[0] : 'Choose a Model'}
+          <span className="mr-2">
+            {selectedModel ? selectedModel.split(':')[0] : 'Choose a Model'}
+          </span>
+          <ChevronDown size={18} />
         </button>
 
         <div

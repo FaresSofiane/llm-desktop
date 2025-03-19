@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from 'react'
-
+import remarkGfm from 'remark-gfm'
 import Markdown from 'react-markdown'
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { dark } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
 const Conversation = ({ messages, isLoading, typingMessage }) => {
   const messagesEndRef = useRef(null)
@@ -28,7 +30,28 @@ const Conversation = ({ messages, isLoading, typingMessage }) => {
               }`}
             >
               <span>
-                <Markdown>{msg.text}</Markdown>
+                <Markdown
+                  children={msg.text}
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    code(props) {
+                      const { children, className, node, ...rest } = props
+                      const match = /language-(\w+)/.exec(className || '')
+                      return match ? (
+                        <SyntaxHighlighter
+                          {...rest}
+                          PreTag="div"
+                          children={String(children).replace(/\n$/, '')}
+                          language={match[1]}
+                        />
+                      ) : (
+                        <code {...rest} className={className}>
+                          {children}
+                        </code>
+                      )
+                    }
+                  }}
+                />
               </span>
             </div>
           ))}
