@@ -129,25 +129,51 @@ export const LLMManagerProvider = ({ children }) => {
     console.log(conversations)
   }
 
-  // Ajouter la fonction addMessageToConversation dans le LLMManagerProvider
-  const addMessageToConversation = (message, sender = 'user') => {
-    if (!currentConversationId) {
-      // Si aucune conversation active, en créer une nouvelle
-      resetConversation();
-    }
+  const addMessageToConversation = (text, sender, images = []) => {
+    if (currentConversationId) {
+      setConversations((prev) =>
+        prev.map((conv) => {
+          if (conv.id === currentConversationId) {
+            // Créer un message avec texte et images
+            const newMessage = {
+              id: Date.now() + Math.random(),
+              sender,
+              text,
+              timestamp: new Date()
+            };
 
-    setConversations((prev) =>
-      prev.map((conv) =>
-        conv.id === currentConversationId
-          ? {
-            ...conv,
-            messages: [...conv.messages, { sender, text: message }]
+            // Ajouter des images au message si elles existent
+            if (images && Array.isArray(images) && images.length > 0) {
+              newMessage.images = [...images];
+            }
+
+            return {
+              ...conv,
+              messages: [...conv.messages, newMessage]
+            };
           }
-          : conv
-      )
-    );
+          return conv;
+        })
+      );
+    } else {
+      // Si aucune conversation active, en créer une nouvelle
+      const newConversation = {
+        id: Date.now(),
+        date: new Date(),
+        messages: [
+          {
+            id: Date.now(),
+            sender,
+            text,
+            images: images && Array.isArray(images) ? [...images] : [],
+            timestamp: new Date()
+          }
+        ]
+      };
 
-    return currentConversationId;
+      setConversations((prev) => [...prev, newConversation]);
+      setCurrentConversationId(newConversation.id);
+    }
   };
 
 
