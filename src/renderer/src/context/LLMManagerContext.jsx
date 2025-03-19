@@ -50,78 +50,6 @@ export const LLMManagerProvider = ({ children }) => {
     }
   }
 
-  const askQuestion = async (question) => {
-    if (selectedModel === '') {
-      throw new Error('Invalid model selected. Please select a valid model.')
-    }
-
-    try {
-      // Récupérer la conversation active
-      const activeConversation = conversations.find((conv) => conv.id === currentConversationId)
-
-      if (!activeConversation) {
-        throw new Error('No active conversation found.')
-      }
-
-      // Préparation des messages pour le modèle
-      const formattedMessages = [
-        ...activeConversation.messages.map((msg) => ({
-          role: msg.sender === 'me' ? 'user' : 'assistant',
-          content: msg.text
-        })),
-        { role: 'user', content: question }
-      ]
-
-      // Appel à ollama.chat
-      const response = await ollama.chat({
-        model: selectedModel,
-        messages: formattedMessages
-      })
-
-      // Simuler l'écriture progressive
-      let currentText = ''
-      for (let i = 0; i < response.message.content.length; i++) {
-        currentText += response.message.content[i]
-        setConversations((prev) =>
-          prev.map((conv) =>
-            conv.id === currentConversationId
-              ? {
-                  ...conv,
-                  messages: [
-                    ...conv.messages.filter((msg) => msg.sender !== 'typing'),
-                    { sender: 'typing', text: currentText }
-                  ]
-                }
-              : conv
-          )
-        )
-        await new Promise((resolve) => setTimeout(resolve, 10)) // Délai entre chaque caractère
-      }
-
-      // Mise à jour de la conversation active avec le message final
-      setConversations((prev) =>
-        prev.map((conv) =>
-          conv.id === currentConversationId
-            ? {
-                ...conv,
-                messages: [
-                  ...conv.messages.filter((msg) => msg.sender !== 'typing'),
-                  { sender: 'me', text: question },
-                  { sender: 'other', text: response.message.content }
-                ]
-              }
-            : conv
-        )
-      )
-
-      console.log(conversations)
-
-      return response.message.content
-    } catch (err) {
-      console.error('Failed to ask question:', err)
-      throw err
-    }
-  }
 
   const resetConversation = () => {
     const newConversation = {
@@ -201,6 +129,28 @@ export const LLMManagerProvider = ({ children }) => {
     console.log(conversations)
   }
 
+  // Ajouter la fonction addMessageToConversation dans le LLMManagerProvider
+  const addMessageToConversation = (message, sender = 'user') => {
+    if (!currentConversationId) {
+      // Si aucune conversation active, en créer une nouvelle
+      resetConversation();
+    }
+
+    setConversations((prev) =>
+      prev.map((conv) =>
+        conv.id === currentConversationId
+          ? {
+            ...conv,
+            messages: [...conv.messages, { sender, text: message }]
+          }
+          : conv
+      )
+    );
+
+    return currentConversationId;
+  };
+
+
   useEffect(() => {
     fetchModels()
     resetConversation() // Initialise une première conversation par défaut
@@ -213,14 +163,15 @@ export const LLMManagerProvider = ({ children }) => {
     loading,
     error,
     refreshModels: fetchModels,
-    askQuestion, // Expose la méthode pour poser des questions
     resetConversation, // Expose la méthode pour réinitialiser la conversation
     switchConversation, // Expose la méthode pour changer de conversation
     addContextToModel, // Expose la méthode pour ajouter un contexte
     changeLanguage, // Expose la méthode pour changer de langue
     conversations, // Expose toutes les conversations
     currentConversationId, // Expose l'ID de la conversation active
-    currentLanguage
+    currentLanguage,
+    addMessageToConversation, // Expose la méthode pour ajouter un message à la conversation
+
   }
 
   return <LLMManagerContext.Provider value={value}>{children}</LLMManagerContext.Provider>
