@@ -3,9 +3,9 @@ import { useState, useEffect, useRef } from 'react'
 import Modal from 'react-modal'
 import { RotateCcw, ChevronDown } from 'lucide-react'
 import ollama from 'ollama' // Assurez-vous que cette bibliothèque est correctement importée
+import PropTypes from 'prop-types'
 
 import icon from '../assets/icon.png'
-
 
 Modal.setAppElement('#root') // Nécessaire pour l'accessibilité
 
@@ -23,6 +23,11 @@ const language = {
   ar: { name: 'العربية', flag: '🇸🇦' },
   ko: { name: '한국어', flag: '🇰🇷' },
   hi: { name: 'हिंदी', flag: '🇮🇳' }
+}
+
+TopBar.propTypes = {
+  size: PropTypes.string.isRequired,
+  platform: PropTypes.string.isRequired
 }
 
 export default function TopBar({ size, platform }) {
@@ -65,8 +70,8 @@ export default function TopBar({ size, platform }) {
     setProgress(0)
     setDownloadSpeed(0)
 
-    let lastTimestamp = Date.now();
-    let lastCompleted = 0;
+    let lastTimestamp = Date.now()
+    let lastCompleted = 0
 
     try {
       const request = {
@@ -79,25 +84,25 @@ export default function TopBar({ size, platform }) {
       const response = await ollama.pull(request)
 
       for await (const part of response) {
-        console.log(part);
+        console.log(part)
 
         // Calculer et mettre à jour la progression
         if (part.total && part.completed) {
-          const progressPercentage = Math.floor((part.completed / part.total) * 100);
-          setProgress(progressPercentage);
+          const progressPercentage = Math.floor((part.completed / part.total) * 100)
+          setProgress(progressPercentage)
 
           // Calculer la vitesse de téléchargement
-          const currentTime = Date.now();
-          const elapsedTime = (currentTime - lastTimestamp) / 1000; // en secondes
+          const currentTime = Date.now()
+          const elapsedTime = (currentTime - lastTimestamp) / 1000 // en secondes
 
           if (elapsedTime > 0) {
-            const downloadedBytes = part.completed - lastCompleted;
-            const speed = downloadedBytes / elapsedTime; // octets par seconde
-            setDownloadSpeed(speed);
+            const downloadedBytes = part.completed - lastCompleted
+            const speed = downloadedBytes / elapsedTime // octets par seconde
+            setDownloadSpeed(speed)
 
             // Mettre à jour les variables pour le prochain calcul
-            lastTimestamp = currentTime;
-            lastCompleted = part.completed;
+            lastTimestamp = currentTime
+            lastCompleted = part.completed
           }
         }
       }
@@ -107,7 +112,6 @@ export default function TopBar({ size, platform }) {
       setModelName('')
       setIsModalOpen(false)
       refreshModels() // Actualiser la liste des modèles disponibles
-
     } catch (error) {
       console.error("Erreur lors de l'installation du modèle:", error)
       alert("Une erreur est survenue lors de l'installation du modèle.")
@@ -139,11 +143,11 @@ export default function TopBar({ size, platform }) {
   // Formatage de la vitesse de téléchargement pour l'affichage
   const formatDownloadSpeed = () => {
     if (downloadSpeed < 1024) {
-      return `${downloadSpeed.toFixed(1)} o/s`;
+      return `${downloadSpeed.toFixed(1)} o/s`
     } else if (downloadSpeed < 1024 * 1024) {
-      return `${(downloadSpeed / 1024).toFixed(1)} Ko/s`;
+      return `${(downloadSpeed / 1024).toFixed(1)} Ko/s`
     } else {
-      return `${(downloadSpeed / (1024 * 1024)).toFixed(1)} Mo/s`;
+      return `${(downloadSpeed / (1024 * 1024)).toFixed(1)} Mo/s`
     }
   }
 
@@ -157,7 +161,7 @@ export default function TopBar({ size, platform }) {
       {/* Colonne avec le bouton dropdown pour les modèles */}
       <div className="flex-none relative z-50 flex justify-center">
         <button
-          className="text-gray-700 px-4 py-2 hover:bg-gray-300 pointer-cursor flex items-center"
+          className={`text-gray-700 px-4 ${size} hover:bg-gray-300 pointer-cursor flex items-center`}
           onClick={() => {
             setIsModelDropdownOpen(!isModelDropdownOpen)
             setIsModalOpen(false) // Fermer le modal si ouvert
@@ -175,7 +179,7 @@ export default function TopBar({ size, platform }) {
           onClick={() => {
             resetConversation()
           }}
-          className="flex items-center justify-center p-2 bg-transparent hover:bg-gray-200 "
+          className={`flex items-center justify-center p-2 ${size} bg-transparent hover:bg-gray-200`}
         >
           <RotateCcw size={18} />
         </div>
@@ -242,7 +246,9 @@ export default function TopBar({ size, platform }) {
                 style={{ width: `${progress}%` }}
               ></div>
             </div>
-            <div className="text-sm text-center">{progress}% complété | {formatDownloadSpeed()}</div>
+            <div className="text-sm text-center">
+              {progress}% complété | {formatDownloadSpeed()}
+            </div>
           </div>
         )}
 
@@ -269,8 +275,8 @@ export default function TopBar({ size, platform }) {
       {/* Bouton pour changer de langue */}
       <div className="flex-none relative z-50 flex justify-center">
         <button
-          className="text-gray-700 px-2 py-2 hover:bg-gray-300 pointer-cursor flex items-center"
-          onClick={() => setIsLanguageDropdownOpen(!isLanguageDropdownOpen)} // Basculez l'état du menu déroulant des langues
+          className={`text-gray-700 px-2 ${size} hover:bg-gray-300 pointer-cursor flex items-center`}
+          onClick={() => setIsLanguageDropdownOpen(!isLanguageDropdownOpen)}
           aria-haspopup="true"
           aria-expanded={isLanguageDropdownOpen}
         >
@@ -301,8 +307,6 @@ export default function TopBar({ size, platform }) {
 
       {/* Colonne qui remplit le reste */}
       <div className={`flex-grow w-[80vw] ${size}`} style={{ WebkitAppRegion: 'drag' }}></div>
-
-
     </div>
   )
 }
