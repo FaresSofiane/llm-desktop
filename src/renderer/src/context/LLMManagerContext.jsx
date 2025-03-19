@@ -31,10 +31,29 @@ export const LLMManagerProvider = ({ children }) => {
   const [selectedModel, setSelectedModel] = useState('') // Défaut : modèle valide
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [conversations, setConversations] = useState([]) // Stocke toutes les conversations
-  const [currentConversationId, setCurrentConversationId] = useState(null) // ID de la conversation active
-
+// Dans votre LLMManagerProvider
+  const [conversations, setConversations] = useState(() => {
+    const initialConversation = {
+      id: Date.now(),
+      date: new Date(),
+      messages: []
+    };
+    return [initialConversation];
+  });
+  const [currentConversationId, setCurrentConversationId] = useState(() => conversations[0].id);
   const [currentLanguage, setCurrentLanguage] = useState('fr')
+
+  const getFormattedConversations = () => {
+    return conversations.map(conv => ({
+      id: conv.id,
+      date: new Date(conv.date).toLocaleString(),
+      preview: conv.messages.length > 0
+        ? conv.messages.find(m => m.sender === 'user')?.text.substring(0, 30) + '...'
+        : 'Nouvelle conversation',
+      isActive: conv.id === currentConversationId
+    }));
+  }
+
 
   const fetchModels = async () => {
     setLoading(true)
@@ -52,15 +71,26 @@ export const LLMManagerProvider = ({ children }) => {
 
 
   const resetConversation = () => {
-    const newConversation = {
-      id: Date.now(), // Utilise un timestamp comme ID unique
-      date: new Date(),
-      messages: []
+    // Vérifier si une conversation vide existe déjà
+    const existingEmptyConversation = conversations.find(
+      conv => conv.messages.length === 0
+    );
+
+    if (existingEmptyConversation) {
+      setCurrentConversationId(existingEmptyConversation.id);
+      return;
     }
 
-    setConversations((prev) => [...prev, newConversation])
-    setCurrentConversationId(newConversation.id)
-  }
+    // Sinon, créer une nouvelle conversation
+    const newConversation = {
+      id: Date.now(),
+      date: new Date(),
+      messages: []
+    };
+
+    setConversations((prev) => [...prev, newConversation]);
+    setCurrentConversationId(newConversation.id);
+  };
 
   const switchConversation = (conversationId = null) => {
     if (conversationId) {
@@ -197,6 +227,7 @@ export const LLMManagerProvider = ({ children }) => {
     currentConversationId, // Expose l'ID de la conversation active
     currentLanguage,
     addMessageToConversation, // Expose la méthode pour ajouter un message à la conversation
+    getFormattedConversations
 
   }
 

@@ -62,7 +62,7 @@ const ChatApp = () => {
       }
 
       // Une fois la réponse complète reçue, ajouter à la conversation
-      addMessageToConversation(responseText, 'assistant')
+      addMessageToConversation(responseText, selectedModel, images)
 
       console.log(typingMessage)
       setTypingMessage('') // Réinitialiser le message en cours de frappe

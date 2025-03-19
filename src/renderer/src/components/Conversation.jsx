@@ -60,7 +60,7 @@ const Conversation = ({ messages, isLoading, typingMessage }) => {
               >
                 {/* En-tête du message */}
                 <div className="flex justify-between items-center mb-2 border-b border-opacity-20 pb-2">
-                  <span className="font-medium">{isSentByMe ? 'You' : 'Assistant'}</span>
+                  <span className="font-medium">{isSentByMe ? 'You' : msg.sender.split(':')[0]}</span>
                   <div className="relative group">
                     <button
                       onClick={() => copyToClipboard(msg.text)}
@@ -134,10 +134,10 @@ const Conversation = ({ messages, isLoading, typingMessage }) => {
 
         {/* Affiche le texte en cours d'écriture */}
         {typingMessage || isLoading ? (
-          <div className="max-w-2xl p-3 rounded-lg bg-gray-300 text-black self-start mr-auto text-left animate-fade-in">
+          <div className="max-w-4xl p-3 rounded-lg bg-gray-300 text-black self-start mr-auto text-left animate-fade-in">
             {/* Ajout du header pendant le chargement */}
             <div className="flex justify-between items-center mb-2 border-b border-opacity-20 pb-2">
-              <span className="font-medium">Assistant</span>
+              <span className="font-medium"></span>
               <div className="relative">
                 <button className="p-1 cursor-not-allowed opacity-50" disabled aria-label="Copier">
                   <Copy size={16} />

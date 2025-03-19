@@ -1,7 +1,7 @@
 import { useLLMManager } from '../context/LLMManagerContext' // Importez le contexte
 import { useState, useEffect, useRef } from 'react'
 import Modal from 'react-modal'
-import { RotateCcw, ChevronDown } from 'lucide-react'
+import { RotateCcw, ChevronDown, MessageSquare, Plus } from 'lucide-react'
 import ollama from 'ollama' // Assurez-vous que cette bibliothèque est correctement importée
 import PropTypes from 'prop-types'
 
@@ -38,17 +38,25 @@ export default function TopBar({ size, platform }) {
     resetConversation,
     changeLanguage,
     currentLanguage,
-    refreshModels // Méthode pour actualiser les modèles
+    refreshModels, // Méthode pour actualiser les modèles
+    conversations, // Liste des conversations disponibles
+    currentConversationId, // ID de la conversation actuelle
+    switchConversation, // Méthode pour changer de conversation
+    createNewConversation // Méthode pour créer une nouvelle conversation
   } = useLLMManager() // Utilisez le contexte
+
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false) // État pour gérer l'ouverture du menu déroulant des modèles
   const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false) // État pour gérer l'ouverture du menu déroulant des langues
+  const [isConversationDropdownOpen, setIsConversationDropdownOpen] = useState(false) // État pour gérer l'ouverture du menu déroulant des conversations
   const [isModalOpen, setIsModalOpen] = useState(false) // État pour gérer l'ouverture du modal
   const [modelName, setModelName] = useState('') // État pour le nom du modèle à installer
   const [progress, setProgress] = useState(0) // État pour la barre de progression
   const [downloadSpeed, setDownloadSpeed] = useState(0) // État pour la vitesse de téléchargement
   const [isInstalling, setIsInstalling] = useState(false) // État pour indiquer si une installation est en cours
+
   const dropdownRef = useRef(null) // Référence pour détecter les clics en dehors
   const languageDropdownRef = useRef(null) // Référence pour le menu déroulant des langues
+  const conversationDropdownRef = useRef(null) // Référence pour le menu déroulant des conversations
 
   const handleModelSelect = (model) => {
     setSelectedModel(model) // Enregistrez le modèle sélectionné dans le contexte
@@ -58,6 +66,16 @@ export default function TopBar({ size, platform }) {
   const handleLanguageSelect = (langCode) => {
     changeLanguage(langCode) // Changez la langue via le contexte
     setIsLanguageDropdownOpen(false) // Fermez le menu déroulant après la sélection
+  }
+
+  const handleConversationSelect = (conversationId) => {
+    switchConversation(conversationId) // Changez de conversation via le contexte
+    setIsConversationDropdownOpen(false) // Fermez le menu déroulant après la sélection
+  }
+
+  const handleNewConversation = () => {
+    resetConversation() // Créer une nouvelle conversation
+    setIsConversationDropdownOpen(false) // Fermez le menu déroulant après la création
   }
 
   const handleInstallModel = async () => {
@@ -107,33 +125,83 @@ export default function TopBar({ size, platform }) {
         }
       }
 
-      // L'installation est terminée avec succès
-      alert(`Le modèle ${modelName} a été installé avec succès.`)
-      setModelName('')
-      setIsModalOpen(false)
-      refreshModels() // Actualiser la liste des modèles disponibles
-    } catch (error) {
-      console.error("Erreur lors de l'installation du modèle:", error)
-      alert("Une erreur est survenue lors de l'installation du modèle.")
-    } finally {
+      console.log('Modèle installé avec succès')
+      refreshModels() // Rafraîchir la liste des modèles après installation
       setIsInstalling(false)
+      setIsModalOpen(false) // Fermer la modale après installation
+      setModelName('')
+    } catch (error) {
+      console.error('Erreur lors de l\'installation du modèle:', error)
+      alert(`Erreur lors de l'installation: ${error.message}`)
+      setIsInstalling(false)
+    }
+  }
+
+  // Gestionnaire pour l'ouverture/fermeture du menu déroulant des modèles
+  const toggleModelDropdown = () => {
+    setIsModelDropdownOpen(!isModelDropdownOpen)
+    setIsLanguageDropdownOpen(false)
+    setIsConversationDropdownOpen(false)
+  }
+
+  // Gestionnaire pour l'ouverture/fermeture du menu déroulant des langues
+  const toggleLanguageDropdown = () => {
+    setIsLanguageDropdownOpen(!isLanguageDropdownOpen)
+    setIsModelDropdownOpen(false)
+    setIsConversationDropdownOpen(false)
+  }
+
+  // Gestionnaire pour l'ouverture/fermeture du menu déroulant des conversations
+  const toggleConversationDropdown = () => {
+    setIsConversationDropdownOpen(!isConversationDropdownOpen)
+    setIsModelDropdownOpen(false)
+    setIsLanguageDropdownOpen(false)
+  }
+
+  // Gestionnaire pour l'ouverture du modal d'installation
+  const openModal = () => {
+    setIsModalOpen(true)
+  }
+
+  // Gestionnaire pour la fermeture du modal d'installation
+  const closeModal = () => {
+    if (!isInstalling) {
+      // Empêcher la fermeture pendant l'installation
+      setIsModalOpen(false)
+      setModelName('')
+      setProgress(0)
       setDownloadSpeed(0)
     }
   }
 
-  // Fermer les dropdowns en cliquant ailleurs
+  // Effet pour détecter les clics en dehors du menu déroulant des modèles
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    function handleClickOutside(event) {
       if (
         dropdownRef.current &&
         !dropdownRef.current.contains(event.target) &&
-        languageDropdownRef.current &&
-        !languageDropdownRef.current.contains(event.target)
+        !event.target.closest('[data-dropdown="model"]')
       ) {
         setIsModelDropdownOpen(false)
+      }
+
+      if (
+        languageDropdownRef.current &&
+        !languageDropdownRef.current.contains(event.target) &&
+        !event.target.closest('[data-dropdown="language"]')
+      ) {
         setIsLanguageDropdownOpen(false)
       }
+
+      if (
+        conversationDropdownRef.current &&
+        !conversationDropdownRef.current.contains(event.target) &&
+        !event.target.closest('[data-dropdown="conversation"]')
+      ) {
+        setIsConversationDropdownOpen(false)
+      }
     }
+
     document.addEventListener('mousedown', handleClickOutside)
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
@@ -141,172 +209,220 @@ export default function TopBar({ size, platform }) {
   }, [])
 
   // Formatage de la vitesse de téléchargement pour l'affichage
-  const formatDownloadSpeed = () => {
-    if (downloadSpeed < 1024) {
-      return `${downloadSpeed.toFixed(1)} o/s`
-    } else if (downloadSpeed < 1024 * 1024) {
-      return `${(downloadSpeed / 1024).toFixed(1)} Ko/s`
+  const formatSpeed = (bytesPerSecond) => {
+    if (bytesPerSecond >= 1024 * 1024) {
+      return `${(bytesPerSecond / (1024 * 1024)).toFixed(2)} MB/s`
+    } else if (bytesPerSecond >= 1024) {
+      return `${(bytesPerSecond / 1024).toFixed(2)} KB/s`
     } else {
-      return `${(downloadSpeed / (1024 * 1024)).toFixed(1)} Mo/s`
+      return `${bytesPerSecond.toFixed(2)} B/s`
     }
   }
 
-  return (
-    <div className={`w-screen ${size} bg-[#f0f0ef] flex flex-row items-center`}>
-      {/* Colonne draggable avec largeur fixe */}
-      <div className="flex-none" style={{ width: platform === 'darwin' ? '75px' : '10px' }}></div>
-      <div className="flex items-center">
-        <img src={icon} alt="App Icon" className="max-h-5 w-auto mx-3" />
-      </div>
-      {/* Colonne avec le bouton dropdown pour les modèles */}
-      <div className="flex-none relative z-50 flex justify-center">
-        <button
-          className={`text-gray-700 px-4 ${size} hover:bg-gray-300 pointer-cursor flex items-center`}
-          onClick={() => {
-            setIsModelDropdownOpen(!isModelDropdownOpen)
-            setIsModalOpen(false) // Fermer le modal si ouvert
-          }}
-          aria-haspopup="true"
-          aria-expanded={isModelDropdownOpen}
-        >
-          <span className="mr-2">
-            {selectedModel ? selectedModel.split(':')[0] : 'Choose a Model'}
-          </span>
-          <ChevronDown size={18} />
-        </button>
+  useEffect(() => {
 
-        <div
-          onClick={() => {
-            resetConversation()
-          }}
-          className={`flex items-center justify-center p-2 ${size} bg-transparent hover:bg-gray-200`}
-        >
-          <RotateCcw size={18} />
+    console.log(conversations)
+
+  }, [conversations])
+
+  // Trouver le nom de la conversation actuelle
+  const currentConversationName = conversations?.find(conv => conv.id === currentConversationId)?.name || "Nouvelle conversation"
+
+  return (
+    <div className={`w-full flex items-center ${size} justify-between px-4 py-2  bg-gray-100 dark:bg-gray-900 border-b border-gray-300 dark:border-gray-700`}>
+      {/* Logo et nom de l'application */}
+      <div className={`flex items-center space-x-2 ${platform === 'darwin' ? 'ml-16' : ''}`}>
+        <img src={icon} alt="Logo" className="w-auto h-6" />
+        <h1 className="text-lg font-bold text-gray-800 dark:text-gray-100">Ollama Chat</h1>
+      </div>
+
+      {/* Section centrale avec les dropdowns */}
+      <div className="flex items-center space-x-4">
+        {/* Sélecteur de conversation */}
+        <div className="relative">
+          <button
+            data-dropdown="conversation"
+            className="flex items-center space-x-1 px-3 py-1 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
+            onClick={toggleConversationDropdown}
+          >
+            <MessageSquare size={16} />
+            <span className="text-sm truncate max-w-[150px]">{currentConversationName}</span>
+            <ChevronDown size={16} />
+          </button>
+
+          {isConversationDropdownOpen && (
+            <div
+              ref={conversationDropdownRef}
+              className="absolute z-10 mt-1 w-56 bg-white dark:bg-gray-800 shadow-lg rounded-lg border border-gray-300 dark:border-gray-700 max-h-60 overflow-y-auto"
+            >
+              <ul>
+                {conversations && conversations.map((conversation) => (
+                  <li
+                    key={conversation.id}
+                    className={`px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer ${
+                      conversation.id === currentConversationId ? 'bg-blue-100 dark:bg-blue-900' : ''
+                    }`}
+                    onClick={() => handleConversationSelect(conversation.id)}
+                  >
+                    {conversation.name || `Conversation ${conversation.id}`}
+                  </li>
+                ))}
+                <li
+                  className="border-t border-gray-300 dark:border-gray-700 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-center"
+                  onClick={handleNewConversation}
+                >
+                  <Plus size={14} className="mr-2" /> Nouvelle conversation
+                </li>
+              </ul>
+            </div>
+          )}
         </div>
 
-        {isModelDropdownOpen && (
-          <div
-            ref={dropdownRef}
-            className="absolute top-full mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50"
+        {/* Sélecteur de modèle */}
+        <div className="relative">
+          <button
+            data-dropdown="model"
+            className="flex items-center space-x-1 px-3 py-1 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
+            onClick={toggleModelDropdown}
           >
-            <ul className="py-1" role="menu">
-              {models.models && models.models.length > 0 ? (
-                models.models.map((model) => (
-                  <li
-                    key={model.name}
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={() => handleModelSelect(model.model)}
-                    role="menuitem"
-                  >
-                    {model.name}
+            <span className="text-sm">Modèle: {selectedModel.split(":")[0] || 'Aucun'}</span>
+            <ChevronDown size={16} />
+          </button>
+
+          {isModelDropdownOpen && (
+            <div
+              ref={dropdownRef}
+              className="absolute z-10 mt-1 w-56 bg-white dark:bg-gray-800 shadow-lg rounded-lg border border-gray-300 dark:border-gray-700 max-h-60 overflow-y-auto"
+            >
+              <ul>
+                {models.models && models.models.length > 0 ? (
+                  models.models.map((model) => (
+                    <li
+                      key={model.name}
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                      onClick={() => handleModelSelect(model.model)}
+                      role="menuitem"
+                    >
+                      {model.name}
+                    </li>
+                  ))
+                ) : (
+                  <li className="px-4 py-2 text-gray-500" role="menuitem">
+                    No models available
                   </li>
-                ))
-              ) : (
-                <li className="px-4 py-2 text-gray-500" role="menuitem">
-                  No models available
+                )}
+                <li
+                  className="border-t border-gray-300 dark:border-gray-700 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                  onClick={() => {
+                    setIsModelDropdownOpen(false)
+                    openModal()
+                  }}
+                >
+                  Installer un nouveau modèle...
                 </li>
-              )}
-              <li
-                className="px-4 py-2 text-blue-500 hover:bg-gray-100 cursor-pointer"
-                onClick={() => {
-                  setIsModalOpen(true)
-                  setIsModelDropdownOpen(false) // Fermer le dropdown
-                }}
-                role="menuitem"
-              >
-                Installer un modèle
-              </li>
-            </ul>
-          </div>
-        )}
+              </ul>
+            </div>
+          )}
+        </div>
+
+        {/* Sélecteur de langue */}
+        <div className="relative">
+          <button
+            data-dropdown="language"
+            className="flex items-center space-x-1 px-3 py-1 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
+            onClick={toggleLanguageDropdown}
+          >
+            <span className="text-sm">{language[currentLanguage]?.flag || '🌐'}</span>
+            <ChevronDown size={16} />
+          </button>
+          {isLanguageDropdownOpen && (
+            <div
+              ref={languageDropdownRef}
+              className="absolute right-0 z-10 mt-1 w-56 bg-white dark:bg-gray-800 shadow-lg rounded-lg border border-gray-300 dark:border-gray-700 max-h-60 overflow-y-auto"
+            >
+              <ul>
+                {Object.entries(language).map(([code, { name, flag }]) => (
+                  <li
+                    key={code}
+                    className={`px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer ${
+                      code === currentLanguage ? 'bg-blue-100 dark:bg-blue-900' : ''
+                    }`}
+                    onClick={() => handleLanguageSelect(code)}
+                  >
+                    <span className="mr-2">{flag}</span>
+                    {name}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+
+        {/* Bouton réinitialiser */}
+        <button
+          className="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
+          onClick={resetConversation}
+          title="Réinitialiser la conversation"
+        >
+          <RotateCcw size={16} />
+        </button>
       </div>
 
-      {/* Modal pour installer un modèle */}
+      {/* Modal pour installer un nouveau modèle */}
       <Modal
         isOpen={isModalOpen}
-        onRequestClose={() => !isInstalling && setIsModalOpen(false)}
-        className="bg-white rounded-lg p-6 h-80 w-1/2 mx-auto mt-20"
-        overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex"
+        onRequestClose={closeModal}
+        className="fixed inset-0 flex items-center justify-center p-4 z-50"
+        overlayClassName="fixed inset-0 bg-black/50 z-40"
+        contentLabel="Installer un modèle"
       >
-        <h2 className="text-xl font-bold mb-4">Installer un nouveau modèle</h2>
-        <input
-          type="text"
-          value={modelName}
-          onChange={(e) => setModelName(e.target.value)}
-          placeholder="Nom du modèle (ex: llama3)"
-          className="w-full border rounded p-2 mb-4"
-          disabled={isInstalling}
-        />
-
-        {isInstalling && (
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md">
+          <h2 className="text-xl font-bold mb-4">Installer un modèle</h2>
           <div className="mb-4">
-            <div className="w-full bg-gray-200 rounded-full h-2.5 mb-1">
-              <div
-                className="bg-blue-600 h-2.5 rounded-full transition-all duration-300 ease-in-out"
-                style={{ width: `${progress}%` }}
-              ></div>
-            </div>
-            <div className="text-sm text-center">
-              {progress}% complété | {formatDownloadSpeed()}
-            </div>
+            <label className="block text-sm font-medium mb-1">Nom du modèle:</label>
+            <input
+              type="text"
+              value={modelName}
+              onChange={(e) => setModelName(e.target.value)}
+              placeholder="Exemple: llama3:8b"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-900"
+              disabled={isInstalling}
+            />
           </div>
-        )}
 
-        <div className="flex justify-end gap-2">
-          <button
-            onClick={() => !isInstalling && setIsModalOpen(false)}
-            className="px-4 py-2 border rounded hover:bg-gray-100"
-            disabled={isInstalling}
-          >
-            Annuler
-          </button>
-          <button
-            onClick={handleInstallModel}
-            className={`px-4 py-2 rounded text-white ${
-              isInstalling ? 'bg-gray-500 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'
-            }`}
-            disabled={isInstalling}
-          >
-            {isInstalling ? 'Installation en cours...' : 'Installer'}
-          </button>
+          {isInstalling && (
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-sm">{progress}%</span>
+                <span className="text-sm">{formatSpeed(downloadSpeed)}</span>
+              </div>
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                <div
+                  className="bg-blue-600 h-2.5 rounded-full"
+                  style={{ width: `${progress}%` }}
+                ></div>
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-end space-x-3">
+            <button
+              onClick={closeModal}
+              className="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600"
+              disabled={isInstalling}
+            >
+              Annuler
+            </button>
+            <button
+              onClick={handleInstallModel}
+              className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed"
+              disabled={isInstalling || !modelName}
+            >
+              {isInstalling ? 'Installation...' : 'Installer'}
+            </button>
+          </div>
         </div>
       </Modal>
-
-      {/* Bouton pour changer de langue */}
-      <div className="flex-none relative z-50 flex justify-center">
-        <button
-          className={`text-gray-700 px-2 ${size} hover:bg-gray-300 pointer-cursor flex items-center`}
-          onClick={() => setIsLanguageDropdownOpen(!isLanguageDropdownOpen)}
-          aria-haspopup="true"
-          aria-expanded={isLanguageDropdownOpen}
-        >
-          <span className="">{language[currentLanguage]?.flag || '🌐'}</span>
-        </button>
-
-        {isLanguageDropdownOpen && (
-          <div
-            ref={languageDropdownRef}
-            className="absolute top-full mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50"
-          >
-            <ul className="py-1" role="menu">
-              {Object.entries(language).map(([code, lang]) => (
-                <li
-                  key={code}
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center"
-                  onClick={() => handleLanguageSelect(code)}
-                  role="menuitem"
-                >
-                  <span className="mr-2">{lang.flag}</span>
-                  {lang.name}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
-
-      {/* Colonne qui remplit le reste */}
-      <div className={`flex-grow w-[80vw] ${size}`} style={{ WebkitAppRegion: 'drag' }}></div>
     </div>
   )
 }
