@@ -8,6 +8,8 @@ function createWindow() {
   const mainWindow = new BrowserWindow({
     width: 900,
     height: 670,
+    minWidth:600,
+    minHeight: 500,
     titleBarStyle: 'hidden',
     ...(process.platform !== 'darwin' ? { titleBarOverlay: true } : {}),
     trafficLightPosition: { x: 12.5, y: 11.5 },

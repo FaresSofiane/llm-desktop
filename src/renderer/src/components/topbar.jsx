@@ -229,12 +229,22 @@ export default function TopBar({ size, platform }) {
   const currentConversationName = conversations?.find(conv => conv.id === currentConversationId)?.name || "Nouvelle conversation"
 
   return (
-    <div className={`w-full flex items-center ${size} justify-between px-4 py-2  bg-gray-100  border-b border-gray-300 `}>
+    <div
+      className={`w-full flex items-center ${size} justify-between px-4 py-2  bg-gray-100  border-b border-gray-300 `}
+    >
       {/* Logo et nom de l'application */}
       <div className={`flex items-center space-x-2 ${platform === 'darwin' ? 'ml-16' : ''}`}>
         <img src={icon} alt="Logo" className="w-auto h-5" />
-        <h1 className="text-lg font-bold text-gray-800 ">Ollama Chat (Sah jsp on l&apos;appelle comment)</h1>
+        <h1 className="text-lg font-bold text-gray-800 ">
+          Alpaga
+        </h1>
       </div>
+
+      <div
+        className="h-6 w-full "
+        style={{ WebkitAppRegion: 'drag' }}
+      ></div>
+
 
       {/* Section centrale avec les dropdowns */}
       <div className={`flex items-center space-x-4 ${platform !== 'darwin' ? 'mr-40' : ''}`}>
@@ -256,17 +266,18 @@ export default function TopBar({ size, platform }) {
               className="absolute z-10 mt-1 w-56 bg-white  shadow-lg rounded-lg border border-gray-300  max-h-60 overflow-y-auto"
             >
               <ul>
-                {conversations && conversations.map((conversation) => (
-                  <li
-                    key={conversation.id}
-                    className={`px-4 py-2 text-sm hover:bg-gray-100  cursor-pointer ${
-                      conversation.id === currentConversationId ? 'bg-blue-100 ' : ''
-                    }`}
-                    onClick={() => handleConversationSelect(conversation.id)}
-                  >
-                    {conversation.name || `Conversation ${conversation.id}`}
-                  </li>
-                ))}
+                {conversations &&
+                  conversations.map((conversation) => (
+                    <li
+                      key={conversation.id}
+                      className={`px-4 py-2 text-sm hover:bg-gray-100  cursor-pointer ${
+                        conversation.id === currentConversationId ? 'bg-blue-100 ' : ''
+                      }`}
+                      onClick={() => handleConversationSelect(conversation.id)}
+                    >
+                      {conversation.name || `Conversation ${conversation.id}`}
+                    </li>
+                  ))}
                 <li
                   className="border-t border-gray-300  px-4 py-2 text-sm hover:bg-gray-100  cursor-pointer flex items-center"
                   onClick={handleNewConversation}
@@ -285,7 +296,8 @@ export default function TopBar({ size, platform }) {
             className="flex items-center space-x-1 px-3 py-1 rounded-lg border border-gray-300  bg-white hover:bg-gray-100 "
             onClick={toggleModelDropdown}
           >
-            <span className="text-sm">Modèle: {selectedModel.split(":")[0] || 'Aucun'}</span>
+            <span className="text-sm hidden sm:inline">Modèle: </span>
+            <span className="text-sm">{selectedModel.split(':')[0] || 'Aucun'}</span>
             <ChevronDown size={16} />
           </button>
 
@@ -357,7 +369,6 @@ export default function TopBar({ size, platform }) {
             </div>
           )}
         </div>
-
       </div>
 
       {/* Modal pour installer un nouveau modèle */}
