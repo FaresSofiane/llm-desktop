@@ -18,6 +18,7 @@ function createWindow() {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
     },
+    visualEffectState: 'active',
     ...(process.platform === 'darwin' && { vibrancy: 'fullscreen-ui' }), // MacOS
     ...(process.platform === 'win32' && { backgroundMaterial: 'acrylic' }) // Windows
   })
