@@ -167,3 +167,4 @@ const Conversation = ({ messages, isLoading, typingMessage }) => {
 }
 
 export default Conversation
+// Writed by Sofiane Fares and Galaad Filâtre

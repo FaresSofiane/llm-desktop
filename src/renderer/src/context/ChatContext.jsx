@@ -24,3 +24,4 @@ export const ChatProvider = ({ children }) => {
 
 // Hook personnalisé pour utiliser le contexte
 export const useChat = () => useContext(ChatContext)
+// Writed by Sofiane Fares and Galaad Filâtre

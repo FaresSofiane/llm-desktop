@@ -46,3 +46,4 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     </LLMManagerProvider>
   </React.StrictMode>
 )
+// Writed by Sofiane Fares and Galaad Filâtre

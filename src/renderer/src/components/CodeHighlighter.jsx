@@ -69,3 +69,4 @@ const CodeHighlighter = ({ text }) => {
 }
 
 export default CodeHighlighter
+// Writed by Sofiane Fares and Galaad Filâtre

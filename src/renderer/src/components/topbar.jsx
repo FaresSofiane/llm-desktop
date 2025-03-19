@@ -236,7 +236,7 @@ export default function TopBar({ size, platform }) {
       <div className={`flex items-center space-x-2 ${platform === 'darwin' ? 'ml-16' : ''}`}>
         <img src={icon} alt="Logo" className="w-auto h-5" />
         <h1 className="text-lg font-bold text-gray-800 ">
-          Alpaga
+          AlpagaLLM
         </h1>
       </div>
 
@@ -429,3 +429,4 @@ export default function TopBar({ size, platform }) {
     </div>
   )
 }
+// Writed by Sofiane Fares and Galaad Filâtre

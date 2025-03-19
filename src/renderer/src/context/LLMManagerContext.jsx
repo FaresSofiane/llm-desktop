@@ -233,3 +233,4 @@ export const LLMManagerProvider = ({ children }) => {
 
   return <LLMManagerContext.Provider value={value}>{children}</LLMManagerContext.Provider>
 }
+// Writed by Sofiane Fares and Galaad Filâtre

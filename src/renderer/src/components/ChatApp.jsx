@@ -107,3 +107,5 @@ const ChatApp = () => {
 }
 
 export default ChatApp
+
+// Writed by Sofiane Fares and Galaad Filâtre

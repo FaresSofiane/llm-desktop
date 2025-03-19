@@ -178,3 +178,4 @@ export default function InputBar({ onSendMessage, isLoading }) {
     </div>
   )
 }
+// Writed by Sofiane Fares and Galaad Filâtre
