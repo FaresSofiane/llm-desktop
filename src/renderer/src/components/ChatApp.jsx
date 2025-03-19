@@ -48,11 +48,25 @@ const ChatApp = () => {
       }
 
       // Envoie la demande à ollama.chat avec streaming
+      const activeConversation = conversations.find((conv) => conv.id === currentConversationId);
+      if (!activeConversation) return;
+
+// Convertir les messages existants au format attendu par Ollama
+      const messageHistory = activeConversation.messages.map(msg => ({
+        role: msg.sender === 'me' ? 'user' : 'assistant',
+        content: msg.text
+      }));
+
+// Ajouter le nouveau message à l'historique
+      const allMessages = [...messageHistory, userMessage];
+
+// Envoie la demande à ollama.chat avec l'historique complet
       const response = await ollama.chat({
         model: selectedModel || 'llama3.1',
-        messages: [userMessage],
+        messages: allMessages,
         stream: true
       })
+
 
       // Traitement de la réponse en streaming
       for await (const part of response) {

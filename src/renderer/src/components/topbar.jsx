@@ -229,20 +229,20 @@ export default function TopBar({ size, platform }) {
   const currentConversationName = conversations?.find(conv => conv.id === currentConversationId)?.name || "Nouvelle conversation"
 
   return (
-    <div className={`w-full flex items-center ${size} justify-between px-4 py-2  bg-gray-100 dark:bg-gray-900 border-b border-gray-300 dark:border-gray-700`}>
+    <div className={`w-full flex items-center ${size} justify-between px-4 py-2  bg-gray-100  border-b border-gray-300 `}>
       {/* Logo et nom de l'application */}
       <div className={`flex items-center space-x-2 ${platform === 'darwin' ? 'ml-16' : ''}`}>
-        <img src={icon} alt="Logo" className="w-auto h-6" />
-        <h1 className="text-lg font-bold text-gray-800 dark:text-gray-100">Ollama Chat</h1>
+        <img src={icon} alt="Logo" className="w-auto h-5" />
+        <h1 className="text-lg font-bold text-gray-800 ">Ollama Chat (Sah jsp on l&apos;appelle comment)</h1>
       </div>
 
       {/* Section centrale avec les dropdowns */}
-      <div className="flex items-center space-x-4">
+      <div className={`flex items-center space-x-4 ${platform !== 'darwin' ? 'mr-40' : ''}`}>
         {/* Sélecteur de conversation */}
         <div className="relative">
           <button
             data-dropdown="conversation"
-            className="flex items-center space-x-1 px-3 py-1 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="flex items-center space-x-1 px-3 py-1 rounded-lg border border-gray-300 bg-white  hover:bg-gray-100 "
             onClick={toggleConversationDropdown}
           >
             <MessageSquare size={16} />
@@ -253,14 +253,14 @@ export default function TopBar({ size, platform }) {
           {isConversationDropdownOpen && (
             <div
               ref={conversationDropdownRef}
-              className="absolute z-10 mt-1 w-56 bg-white dark:bg-gray-800 shadow-lg rounded-lg border border-gray-300 dark:border-gray-700 max-h-60 overflow-y-auto"
+              className="absolute z-10 mt-1 w-56 bg-white  shadow-lg rounded-lg border border-gray-300  max-h-60 overflow-y-auto"
             >
               <ul>
                 {conversations && conversations.map((conversation) => (
                   <li
                     key={conversation.id}
-                    className={`px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer ${
-                      conversation.id === currentConversationId ? 'bg-blue-100 dark:bg-blue-900' : ''
+                    className={`px-4 py-2 text-sm hover:bg-gray-100  cursor-pointer ${
+                      conversation.id === currentConversationId ? 'bg-blue-100 ' : ''
                     }`}
                     onClick={() => handleConversationSelect(conversation.id)}
                   >
@@ -268,7 +268,7 @@ export default function TopBar({ size, platform }) {
                   </li>
                 ))}
                 <li
-                  className="border-t border-gray-300 dark:border-gray-700 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-center"
+                  className="border-t border-gray-300  px-4 py-2 text-sm hover:bg-gray-100  cursor-pointer flex items-center"
                   onClick={handleNewConversation}
                 >
                   <Plus size={14} className="mr-2" /> Nouvelle conversation
@@ -282,7 +282,7 @@ export default function TopBar({ size, platform }) {
         <div className="relative">
           <button
             data-dropdown="model"
-            className="flex items-center space-x-1 px-3 py-1 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="flex items-center space-x-1 px-3 py-1 rounded-lg border border-gray-300  bg-white hover:bg-gray-100 "
             onClick={toggleModelDropdown}
           >
             <span className="text-sm">Modèle: {selectedModel.split(":")[0] || 'Aucun'}</span>
@@ -292,7 +292,7 @@ export default function TopBar({ size, platform }) {
           {isModelDropdownOpen && (
             <div
               ref={dropdownRef}
-              className="absolute z-10 mt-1 w-56 bg-white dark:bg-gray-800 shadow-lg rounded-lg border border-gray-300 dark:border-gray-700 max-h-60 overflow-y-auto"
+              className="absolute z-10 mt-1 w-56 bg-white shadow-lg rounded-lg border border-gray-300  max-h-60 overflow-y-auto"
             >
               <ul>
                 {models.models && models.models.length > 0 ? (
@@ -312,7 +312,7 @@ export default function TopBar({ size, platform }) {
                   </li>
                 )}
                 <li
-                  className="border-t border-gray-300 dark:border-gray-700 px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                  className="border-t border-gray-300  px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
                   onClick={() => {
                     setIsModelDropdownOpen(false)
                     openModal()
@@ -329,7 +329,7 @@ export default function TopBar({ size, platform }) {
         <div className="relative">
           <button
             data-dropdown="language"
-            className="flex items-center space-x-1 px-3 py-1 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="flex items-center space-x-1 px-3 py-1 rounded-lg border border-gray-300  bg-white  hover:bg-gray-100 "
             onClick={toggleLanguageDropdown}
           >
             <span className="text-sm">{language[currentLanguage]?.flag || '🌐'}</span>
@@ -338,14 +338,14 @@ export default function TopBar({ size, platform }) {
           {isLanguageDropdownOpen && (
             <div
               ref={languageDropdownRef}
-              className="absolute right-0 z-10 mt-1 w-56 bg-white dark:bg-gray-800 shadow-lg rounded-lg border border-gray-300 dark:border-gray-700 max-h-60 overflow-y-auto"
+              className="absolute right-0 z-10 mt-1 w-56 bg-white  shadow-lg rounded-lg border border-gray-300  max-h-60 overflow-y-auto"
             >
               <ul>
                 {Object.entries(language).map(([code, { name, flag }]) => (
                   <li
                     key={code}
-                    className={`px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer ${
-                      code === currentLanguage ? 'bg-blue-100 dark:bg-blue-900' : ''
+                    className={`px-4 py-2 text-sm hover:bg-gray-100  cursor-pointer ${
+                      code === currentLanguage ? 'bg-blue-100 ' : ''
                     }`}
                     onClick={() => handleLanguageSelect(code)}
                   >
@@ -358,14 +358,6 @@ export default function TopBar({ size, platform }) {
           )}
         </div>
 
-        {/* Bouton réinitialiser */}
-        <button
-          className="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
-          onClick={resetConversation}
-          title="Réinitialiser la conversation"
-        >
-          <RotateCcw size={16} />
-        </button>
       </div>
 
       {/* Modal pour installer un nouveau modèle */}
@@ -376,7 +368,7 @@ export default function TopBar({ size, platform }) {
         overlayClassName="fixed inset-0 bg-black/50 z-40"
         contentLabel="Installer un modèle"
       >
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md">
+        <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
           <h2 className="text-xl font-bold mb-4">Installer un modèle</h2>
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1">Nom du modèle:</label>
@@ -385,7 +377,7 @@ export default function TopBar({ size, platform }) {
               value={modelName}
               onChange={(e) => setModelName(e.target.value)}
               placeholder="Exemple: llama3:8b"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-900"
+              className="w-full px-3 py-2 border border-gray-300  rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white "
               disabled={isInstalling}
             />
           </div>
@@ -396,7 +388,7 @@ export default function TopBar({ size, platform }) {
                 <span className="text-sm">{progress}%</span>
                 <span className="text-sm">{formatSpeed(downloadSpeed)}</span>
               </div>
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+              <div className="w-full bg-gray-200  rounded-full h-2.5">
                 <div
                   className="bg-blue-600 h-2.5 rounded-full"
                   style={{ width: `${progress}%` }}
@@ -408,7 +400,7 @@ export default function TopBar({ size, platform }) {
           <div className="flex justify-end space-x-3">
             <button
               onClick={closeModal}
-              className="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600"
+              className="px-4 py-2 rounded-lg bg-gray-300  hover:bg-gray-400 "
               disabled={isInstalling}
             >
               Annuler
