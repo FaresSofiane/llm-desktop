@@ -1,7 +1,12 @@
+import ChatApp from './components/ChatApp'
+import { ChatProvider } from './context/ChatContext'
+
 function App() {
   return (
     <>
-      <a className={'text-red-500'}>Test</a>
+      <ChatProvider>
+        <ChatApp />
+      </ChatProvider>
     </>
   )
 }

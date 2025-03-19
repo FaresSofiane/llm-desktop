@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
 import TopBar from './components/topbar'
+import { LLMManagerProvider } from './context/LLMManagerContext'
 
 const Main = () => {
   const [platform, setPlatform] = useState('')
@@ -40,6 +41,8 @@ const Main = () => {
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <Main />
+    <LLMManagerProvider>
+      <Main />
+    </LLMManagerProvider>
   </React.StrictMode>
 )
